@@ -27,10 +27,6 @@ function gestionarMovimiento(event) {
     })
 }
 
-const contenedor = document.querySelector("#contenedor")
-contenedor.addEventListener("mousemove", gestionarMovimiento)
-
-
 // ====== MOSCA ======= //
 
 const CURSOR_WIDTH = 30 + 7
@@ -68,3 +64,45 @@ function actualizarCursor(event) {
 }
 
 window.addEventListener("mousemove", actualizarCursor)
+
+
+// ==== Movimiento ==== //
+
+let interval = null
+function animateToPosition(event) {
+    const imagen = document.querySelector("#imagen")
+    const rect = imagen.getBoundingClientRect()
+    const startx = rect.left
+    const starty = rect.top
+    const cursorX = event.clientX - (rect.width / 2)
+    const cursorY = event.clientY - (rect.height / 2)
+
+    const refreshPerSecond = 60
+
+    const progressX = (cursorX - startx) / refreshPerSecond
+    const progressY = (cursorY - starty) / refreshPerSecond
+
+    let itirations = 2 // empieza por 2 porque es un parche al mismatch de js al DOM
+
+    if (!interval) {
+        interval = setInterval(() => {
+            running = true
+            const movimientox = Math.round(startx + (progressX * itirations))
+            const movimientoy = Math.round(starty + (progressY * itirations))
+            itirations++
+            if (itirations <= refreshPerSecond) {
+                imagen.style.top = `${movimientoy}px`
+                imagen.style.left = `${movimientox}px`
+            } else {
+                itirations = 1
+                clearTimeout(interval)
+                interval = null
+            }
+        }, 1000 / refreshPerSecond)
+    }
+}
+
+
+const contenedor = document.querySelector("#contenedor")
+contenedor.addEventListener("mousemove", gestionarMovimiento)
+contenedor.addEventListener("click", animateToPosition)
